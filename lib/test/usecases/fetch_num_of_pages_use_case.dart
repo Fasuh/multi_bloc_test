@@ -3,13 +3,13 @@ import 'package:meta/meta.dart';
 import 'package:testing_ground/common/error/failures.dart';
 import 'package:testing_ground/common/usecases/usecase.dart';
 
-class FetchNumOfPagesUseCase extends UseCase<List, NoParams> {
+class FetchNumOfPagesUseCase extends UseCase<int, NoParams> {
   FetchNumOfPagesUseCase({@required this.repository}) : assert(repository != null);
 
-  final  repository;
+  final int repository;
 
   @override
-  Future<Either<Failure, List>> call(NoParams params) {
-    return Future.value(Right([]));
+  Future<Either<Failure, int>> call(NoParams params) {
+    return Future.value(Right(repository));
   }
 }

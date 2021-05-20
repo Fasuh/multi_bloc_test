@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:testing_ground/common/presentation/bloc/any_list_bloc/any_list_bloc.dart';
+import 'package:testing_ground/common/presentation/widget/any_changeable_button/any_changeable_button.dart';
+import 'package:testing_ground/common/presentation/widget/pagewise.dart';
 import 'package:testing_ground/test/test_bloc.dart';
+import 'package:testing_ground/test/usecases/fetch_num_of_pages_use_case.dart';
+import 'package:testing_ground/test/usecases/fetch_page_use_case.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,47 +33,54 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   TestBloc testBloc;
 
   @override
   void initState() {
-    testBloc = TestBloc();
+    testBloc = TestBloc(
+      anyFetchUseCase: FetchNumOfPagesUseCase(repository: 3),
+      getListUseCase: FetchPageUseCase(repository: ['asdf']),
+    );
     super.initState();
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      testBloc.state.ofType<AnyListBloc>();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+          children: [
+            Expanded(
+              child: PagewiseBlocListView(
+                bloc: testBloc,
+                itemBuilder: (context, state) {
+                  if (state is DataPagewiseState) {
+                    return Container(
+                      child: Text(state.element.toString()),
+                    );
+                  } else if (state is ErrorPagewiseState) {
+                    return Container(
+                      height: 100,
+                      width: 100,
+                      color: Colors.red,
+                    );
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            Expanded(
+              child: AnyChangeableButton(
+                button: Container(),
+                bloc: testBloc,
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 

@@ -20,8 +20,7 @@ class ListParam<T> extends Equatable {
   ListParam({
     @required this.page,
     @required this.search,
-  })  : assert(page != null),
-        assert(search != null);
+  })  : assert(page != null);
 
   @override
   List<Object> get props => [page, search];

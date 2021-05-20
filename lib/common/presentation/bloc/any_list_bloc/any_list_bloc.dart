@@ -16,7 +16,7 @@ mixin AnyListBloc<Data, Search> on AnyBloc {
   Search search;
   List appendedItems = [];
   int firstPageNum = 1;
-  int numberOfLoadedPages;
+  int numberOfLoadedPages = 0;
   bool hasMoreItems = true;
   Object error;
   bool isFetching = false;
@@ -31,6 +31,11 @@ mixin AnyListBloc<Data, Search> on AnyBloc {
 
   Future<Either<Failure, List<Data>>> fetchForPage(int page, Search search) {
     return getListUseCase(ListParam<Search>(page: page, search: search));
+  }
+
+  Stream<AnyState> _setOwnState(AnyDetailState state) async* {
+    _ownState = state;
+    yield* dispatchState();
   }
 
   AnyDetailState _ownState;
@@ -71,8 +76,7 @@ mixin AnyListBloc<Data, Search> on AnyBloc {
       if (isRetrying) {
         error = null;
         hasMoreItems = true;
-        _ownState = AnyListDataFetched(this.loadedItems, false, null, loadedItems.isNotEmpty, search, isRetry: isRetry);
-        yield* dispatchState();
+        yield* _setOwnState(AnyListDataFetched(this.loadedItems, false, null, loadedItems.isNotEmpty, search, isRetry: isRetry));
         isRetrying = !isRetry;
       }
       List<Data> page;
@@ -80,7 +84,7 @@ mixin AnyListBloc<Data, Search> on AnyBloc {
       yield* result.fold((error) async* {
         this.error = error;
         this.isFetching = false;
-        yield AnyListError(error, loadedItems.isNotEmpty);
+        yield* _setOwnState(AnyListError(error, loadedItems.isNotEmpty));
       }, (data) async* {
         Fimber.d('PREFETCH !@!@!');
         page = data;
